@@ -8,6 +8,7 @@ use Illuminate\Http\Response;
 use App\Http\Requests\FileRequest;
 use App\Http\Resources\FileResource;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Requests\FileHistoryRequest;
 
 class FileController extends Controller
 {
@@ -45,6 +46,16 @@ class FileController extends Controller
                 'message' => 'Algo deu errado ao salvar o arquivo. Tente novamente mais tarde!',
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
+
+        return new FileResource($file);
+    }
+
+    /**
+     * Retorna um arquivo baseado no nome e/ou data de referência.
+     */
+    public function history(FileHistoryRequest $request)
+    {
+        $file = File::history($request->validated());
 
         return new FileResource($file);
     }

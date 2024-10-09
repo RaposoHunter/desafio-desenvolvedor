@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use App\Models\File;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class FileResource extends JsonResource
@@ -22,6 +23,11 @@ class FileResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return parent::toArray($request);
+        if(!$this->resource) return [];
+
+        $data = parent::toArray($request);
+        $data['path'] = Storage::url($this->resource->path);
+
+        return $data;
     }
 }

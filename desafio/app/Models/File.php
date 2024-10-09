@@ -32,6 +32,22 @@ class File extends Model
     ];
 
     /**
+     * Retorna um arquivo baseado no nome e/ou data de referência.
+     *
+     * @param array{name?:string,created_at?:string} $input
+     *
+     * @return static
+     */
+    public static function history(array $input)
+    {
+        return static::query()
+                     ->when(!empty($input['name']), fn($query) => $query->where('name', 'like', "%{$input['name']}%"))
+                     ->when(!empty($input['created_at']), fn($query) => $query->whereDate('created_at', $input['created_at']))
+                     ->latest()
+                     ->first();
+    }
+
+    /**
      * Realiza o upload do arquivo para o disco padrão.
      *
      * @return array{path:string,extension:string,size:int}
