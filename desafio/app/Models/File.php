@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Exception;
+use App\Enums\FileUploadStatus;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Stringable;
 use MongoDB\Laravel\Eloquent\Model;
@@ -30,6 +31,7 @@ class File extends Model
         'extension',
         'path',
         'size',
+        'status'
     ];
 
     /**
@@ -38,6 +40,18 @@ class File extends Model
      * @var array
      */
     protected $appends = ['download_path'];
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'status' => FileUploadStatus::class,
+        ];
+    }
 
     /**
      * Get the value of the file's download path.

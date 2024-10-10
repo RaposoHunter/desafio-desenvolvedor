@@ -6,6 +6,7 @@ use Exception;
 use App\Models\File;
 use App\Jobs\ImportFile;
 use Illuminate\Http\Response;
+use App\Enums\FileUploadStatus;
 use App\Http\Requests\FileRequest;
 use App\Http\Resources\FileResource;
 use Illuminate\Support\Facades\Storage;
@@ -30,6 +31,7 @@ class FileController extends Controller
 
         try {
             $input = array_merge($input, File::upload($request->file('file')));
+            $input['status'] = FileUploadStatus::Pending;
 
             $file = File::query()->create($input);
         } catch(Exception $e) {
