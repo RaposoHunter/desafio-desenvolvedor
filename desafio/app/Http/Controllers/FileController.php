@@ -9,8 +9,12 @@ use Illuminate\Http\Response;
 use App\Enums\FileUploadStatus;
 use App\Http\Requests\FileRequest;
 use App\Http\Resources\FileResource;
+use MongoDB\Laravel\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Requests\FileContentRequest;
 use App\Http\Requests\FileHistoryRequest;
+use App\Http\Resources\FileRecordResource;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class FileController extends Controller
 {
@@ -68,8 +72,32 @@ class FileController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(File $file)
+    public function content(File $file, FileContentRequest $request)
     {
-        //
+        if(Storage::fileMissing($file->path)) {
+            return response()->json([
+                'message' => 'Arquivo não encontrado',
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        if(!$file->uploaded()) {
+            return response()->json([
+                'message' => 'O arquivo ainda não processado. Aguarde mais uns minutos e tente novamente.',
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        $records = $file->records();
+
+        if($request->filled('RptDt') || $request->filled('TckrSymb')) {
+            $records = $records->when($request->filled('RptDt'), fn(Builder $query) => $query->where('RptDt', $request->input('RptDt')))
+                                ->when($request->filled('TckrSymb'), fn(Builder $query) => $query->where('TckrSymb', $request->input('TckrSymb')))
+                                ->first();
+        } else {
+            $records = $records->paginate(10);
+        }
+
+        return $records instanceof LengthAwarePaginator
+            ? FileRecordResource::collection($records)
+            : new FileRecordResource($records);
     }
 }

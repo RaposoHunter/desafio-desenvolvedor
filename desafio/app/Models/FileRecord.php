@@ -88,10 +88,10 @@ class FileRecord extends Model
     /**
      * Get the file that owns the FileRecord
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return \MongoDB\Laravel\Relations\BelongsTo
      */
     public function file(): BelongsTo
     {
-        return $this->belongsTo(File::class, 'FileId');
+        return $this->belongsTo(File::class, 'FileId', '_id');
     }
 }

@@ -13,6 +13,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::prefix('files')->group(function () {
             Route::post('/', [FileController::class, 'store']);
             Route::get('/history', [FileController::class, 'history']);
+            Route::get('/{file}/content', [FileController::class, 'content']);
         });
     });
 });

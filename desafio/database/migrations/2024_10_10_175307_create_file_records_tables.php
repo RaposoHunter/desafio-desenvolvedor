@@ -1,9 +1,9 @@
 <?php
 
 use App\Models\File;
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
 return new class extends Migration
 {
@@ -12,7 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('file_records_tables', function (Blueprint $table) {
+        Schema::create('file_records', function (Blueprint $table) {
             $table->id();
 
             $table->foreignIdFor(File::class)->constrained();
@@ -79,6 +79,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('file_records_tables');
+        Schema::dropIfExists('file_records');
     }
 };

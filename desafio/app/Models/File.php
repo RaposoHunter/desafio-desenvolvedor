@@ -7,6 +7,7 @@ use App\Enums\FileUploadStatus;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Stringable;
 use MongoDB\Laravel\Eloquent\Model;
+use MongoDB\Laravel\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -54,6 +55,16 @@ class File extends Model
     }
 
     /**
+     * Get all of the records for the File
+     *
+     * @return \MongoDB\Laravel\Relations\HasMany
+     */
+    public function records(): HasMany
+    {
+        return $this->hasMany(FileRecord::class, 'FileId', '_id');
+    }
+
+    /**
      * Get the value of the file's download path.
      *
      * @param  string  $value
@@ -98,5 +109,10 @@ class File extends Model
         $data['size'] = $file->getSize();
 
         return $data;
+    }
+
+    public function uploaded()
+    {
+        return $this->status === FileUploadStatus::Uploaded;
     }
 }
