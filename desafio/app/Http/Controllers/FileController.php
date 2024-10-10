@@ -9,6 +9,7 @@ use Illuminate\Http\Response;
 use App\Enums\FileUploadStatus;
 use App\Http\Requests\FileRequest;
 use App\Http\Resources\FileResource;
+use Illuminate\Support\Facades\Cache;
 use MongoDB\Laravel\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\FileContentRequest;
@@ -70,7 +71,7 @@ class FileController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Busca os conteúdos de um arquivo
      */
     public function content(File $file, FileContentRequest $request)
     {
@@ -86,14 +87,17 @@ class FileController extends Controller
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        $records = $file->records();
-
         if($request->filled('RptDt') || $request->filled('TckrSymb')) {
-            $records = $records->when($request->filled('RptDt'), fn(Builder $query) => $query->where('RptDt', $request->input('RptDt')))
-                                ->when($request->filled('TckrSymb'), fn(Builder $query) => $query->where('TckrSymb', $request->input('TckrSymb')))
-                                ->first();
+            $key = "CachedFileRecord[RptDt={$request->query('RptDt')}][TckrSymb={$request->query('TckrSymb')}]";
+
+            $records = Cache::remember($key, now()->endOfWeek(), fn() =>
+                $file->records()
+                        ->when($request->filled('RptDt'), fn(Builder $query) => $query->where('RptDt', $request->input('RptDt')))
+                        ->when($request->filled('TckrSymb'), fn(Builder $query) => $query->where('TckrSymb', $request->input('TckrSymb')))
+                        ->first()
+            );
         } else {
-            $records = $records->paginate(10);
+            $records = $file->records()->paginate(10);
         }
 
         return $records instanceof LengthAwarePaginator

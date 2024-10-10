@@ -7,6 +7,7 @@ use App\Enums\FileUploadStatus;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Stringable;
 use MongoDB\Laravel\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 use MongoDB\Laravel\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -84,11 +85,19 @@ class File extends Model
      */
     public static function history(array $input)
     {
-        return static::query()
-                     ->when(!empty($input['name']), fn($query) => $query->where('name', 'like', "%{$input['name']}%"))
-                     ->when(!empty($input['created_at']), fn($query) => $query->whereDate('created_at', $input['created_at']))
-                     ->latest()
-                     ->first();
+        $name = $input['name'] ?? null;
+        $created_at = $input['created_at'] ?? null;
+
+        $key = "CachedFile[name={$name}][created_at={$created_at}]";
+
+        return Cache::remember($key, now()->endOfWeek(), fn() =>
+            static::query()
+                ->when(!empty($name), fn($query) => $query->where('name', 'like', "%{$name}%"))
+                ->when(!empty($created_at), fn($query) => $query->whereDate('created_at', $created_at))
+                ->latest()
+                ->first()
+        );
+
     }
 
     /**
