@@ -25,9 +25,6 @@ class FileResource extends JsonResource
     {
         if(!$this->resource) return [];
 
-        $data = parent::toArray($request);
-        $data['path'] = Storage::url($this->resource->path);
-
-        return $data;
+        return parent::toArray($request);
     }
 }

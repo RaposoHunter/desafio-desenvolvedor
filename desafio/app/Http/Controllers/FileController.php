@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Exception;
 use App\Models\File;
+use App\Jobs\ImportFile;
 use Illuminate\Http\Response;
 use App\Http\Requests\FileRequest;
 use App\Http\Resources\FileResource;
@@ -46,6 +47,8 @@ class FileController extends Controller
                 'message' => 'Algo deu errado ao salvar o arquivo. Tente novamente mais tarde!',
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
+
+        dispatch(new ImportFile($file));
 
         return new FileResource($file);
     }

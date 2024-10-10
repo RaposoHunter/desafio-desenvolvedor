@@ -6,6 +6,7 @@ use Exception;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Stringable;
 use MongoDB\Laravel\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class File extends Model
@@ -30,6 +31,24 @@ class File extends Model
         'path',
         'size',
     ];
+
+    /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array
+     */
+    protected $appends = ['download_path'];
+
+    /**
+     * Get the value of the file's download path.
+     *
+     * @param  string  $value
+     * @return string
+     */
+    public function getDownloadPathAttribute($value)
+    {
+        return Storage::url($this->path);
+    }
 
     /**
      * Retorna um arquivo baseado no nome e/ou data de referência.
