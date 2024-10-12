@@ -10,5 +10,10 @@ class {{ class }} extends Model
     {{ factoryDocBlock }}
     use HasFactory;
 
+    /**
+     * The connection name for the model.
+     *
+     * @var string|null
+     */
     protected $connection = 'mongodb';
 }
