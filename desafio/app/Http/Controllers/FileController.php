@@ -83,8 +83,8 @@ class FileController extends Controller
 
         if(!$file->uploaded()) {
             return response()->json([
-                'message' => 'O arquivo ainda não processado. Aguarde mais uns minutos e tente novamente.',
-            ], Response::HTTP_UNPROCESSABLE_ENTITY);
+                'message' => 'O arquivo ainda não foi processado. Aguarde mais uns minutos e tente novamente.',
+            ], Response::HTTP_BAD_REQUEST);
         }
 
         if($request->filled('RptDt') || $request->filled('TckrSymb')) {
