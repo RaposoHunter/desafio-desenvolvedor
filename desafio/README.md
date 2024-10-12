@@ -1,40 +1,4 @@
 # Oliveira Trust - Desafio Técnico Backend
-
-<style>
-    .endpoint {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem
-    }
-
-    .endpoint-method {
-        padding: 0.3rem 1rem;
-        border-radius: 16px;
-        color: white;
-        font-size: 0.8rem;
-    }
-
-    .endpoint-method.endpoint-get {
-        background-color: #0e9b71;
-    }
-
-    .endpoint-method.endpoint-get::after {
-        content: 'GET'
-    }
-
-    .endpoint-method.endpoint-post {
-        background-color: #0171c2;
-    }
-
-    .endpoint-method.endpoint-post::after {
-        content: 'POST'
-    }
-
-    th {
-        text-align: center
-    }
-</style>
-
 <div style="display:flex; justify-content: center; align-items: center">
     <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcQIAOtqQ5is5vwbcEn0ZahZfMxz1QIeAYtFfnLdkCXu1sqAGbnX" width="300">
     <img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="300" alt="Laravel Logo">
@@ -50,7 +14,6 @@ O desafio consiste em desenvolver uma API para receber arquivos CSV e Excel, per
 * Laravel Excel 3.1+
 
 ## Instalação
-
 As dependências do projeto são gerenciadas pelo Composer e podem ser instaladas através do comando:
 ```bash
 composer install
@@ -68,6 +31,8 @@ php artisan key:generate --ansi
 Talvez seja necessário instalar a extensão do MongoDB (caso ainda não a tenha no sistema). Para isso basta seguir o tutorial disponibilizado pelo PHP neste [link](https://www.php.net/manual/en/mongodb.installation.php).
 
 ## Iniciando o projeto
+
+### Servidor local
 O Laravel oferece um servidor local próprio que pode ser utilizado através do comando:
 ```bash
 php artisan serve --port=8080
@@ -78,15 +43,32 @@ Caso, por algum motivo, não seja possível iniciar um servidor local utilizando
 php -S localhost:8080 -t public/
 ```
 
-OBS: Caso porta 8080 esteja em uso basta informar uma outra. Neste caso, considere a nova porta nos exemplos abaixo.
+OBS: Caso porta 8080 esteja em uso basta informar uma outra. Neste caso, considere a nova porta na seção de endpoints.
+
+### Queue
+Além de iniciar o servidor local, também será necessário iniciar a fila para que os arquivos enviados sejam processados no *background*.
+Sem ela, os arquivos ficarão apenas disponíveis no servidor mas não poderão ser consultados pelos endpoints.
+
+Para iniciar a fila basta iniciar uma nova instância do prompt de comando (cmd, bash, powershell...) e utilizar o comando:
+```bash
+php artisan queue:work
+```
+
+### Cache
+Os dados dos arquivos são salvos em cache após a primeira requisição para permitir uma consulta mais rápida sem buscar
+no banco toda vez. Cada chave do cache persiste até o fim da semana e, passando esse período, será salvo de novo se baseando
+no endpoint utilizado e nos parâmetros informados nas requisições.
+
+Ex.: Uma requisição para o endpoint de busca pelo conteúdo de um arquivo utilizando o parâmetro 
+`TckrSymb=003H11` adiciona um registro no cache com o resultado da consulta salvo como `CachedFileRecord[RptDt=][TckrSymb=003H11]`. Da próxima vez que uma consulta for realizada utilizando esses mesmos moldes será retornado o valor em cache.
 
 ## Endpoints
 Para acessar a documentação completa da API, com exemplos, clique [aqui](https://www.postman.com/docking-module-geologist-46239461/1010229a-4f88-4d41-8f37-c018dd7886f7/documentation/mdfdcbn/desafio-tcnico-oliveira-trust).
 
 ### Login
-<span class="endpoint">
+<span style="display: flex; flex-direction: column; gap: 0.5rem">
     <span>
-        <span class="endpoint-method endpoint-post"></span> /login
+        <span style="padding: 0.3rem 1rem; border-radius: 16px; color: white; font-size: 0.8rem; background-color: #0171c2;">POST</span> /login
     </span>
     <span>
         Este endpoint permite que os usuário se autentiquem com a API antes de utilizar qualquer outro endpoint. Ao efetuar o login o token deve ser salvo e enviado em requisições subsequentes no modelo Bearer Auth.
@@ -94,7 +76,6 @@ Para acessar a documentação completa da API, com exemplos, clique [aqui](https
 </span>
 
 #### Exemplo em JavaScript
-
 ```js
 // Passo 1: Montar as credenciais a serem usadas
 const credentials = {
@@ -120,9 +101,9 @@ localStorage.setItem('token', token);
 ```
 
 ### Logout
-<span class="endpoint">
+<span style="display: flex; flex-direction: column; gap: 0.5rem">
     <span>
-        <span class="endpoint-method endpoint-post"></span> /logout
+        <span style="padding: 0.3rem 1rem; border-radius: 16px; color: white; font-size: 0.8rem; background-color: #0171c2;">POST</span> /logout
     </span>
     <span>
         Este endpoint permite que os usuário autenticados finalizem suas sessões. Após realizar o logout é importante remover invalidar/limpar o token salvo.
@@ -130,7 +111,6 @@ localStorage.setItem('token', token);
 </span>
 
 #### Exemplo em JavaScript
-
 ```js
 // Passo 1: Efetuar chamada ao endpoint
 const response = await fetch('https://localhost:8080/logout', {
@@ -145,9 +125,9 @@ localStorage.removeItem('token');
 ```
 
 ### Upload de Arquivo
-<span class="endpoint">
+<span style="display: flex; flex-direction: column; gap: 0.5rem">
     <span>
-        <span class="endpoint-method endpoint-post"></span> /api/v1/files
+        <span style="padding: 0.3rem 1rem; border-radius: 16px; color: white; font-size: 0.8rem; background-color: #0171c2;">POST</span> /api/v1/files
     </span>
     <span>
         Este endpoint permite realizar o upload de um arquivo CSV (.csv) ou Excel (.xlsx). Ao enviar o arquivo, ele será salvo no servidor e será iniciado um processo de importação para capturar os dados, salvando-os no banco de dados.
@@ -197,17 +177,16 @@ const data = await response.json();
 ```
 
 ### Histórico de Upload de Arquivo
-<span class="endpoint">
+<span style="display: flex; flex-direction: column; gap: 0.5rem">
     <span>
-        <span class="endpoint-method endpoint-get"></span> /api/v1/files/history
+        <span style="padding: 0.3rem 1rem; border-radius: 16px; color: white; font-size: 0.8rem; background-color: #0e9b71;">GET</span> /api/v1/files/history
     </span>
     <span>
         Este endpoint permite realizar a busca de um arquivo em específico pelo nome e/ou data de criação. É obrigatório informar pelo menos um dos parâmetros.
     </span>
 </span>
 
-<br>
-
+#### Exemplo em JavaScript
 ```js
 // Passo 1: Recuperar o token retornado pelo endpoint de login
 const token = localStorage.getItem('token');
@@ -247,17 +226,16 @@ const data = await response.json();
 ```
 
 ### Buscar Conteúdo do Arquivo
-<span class="endpoint">
+<span style="display: flex; flex-direction: column; gap: 0.5rem">
     <span>
-        <span class="endpoint-method endpoint-post"></span> /api/v1/files/{file}
+        <span style="padding: 0.3rem 1rem; border-radius: 16px; color: white; font-size: 0.8rem; background-color: #0171c2;">POST</span> /api/v1/files/{file}
     </span>
     <span>
         Este endpoint permite buscar pelo conteúdo de um arquivo em específico por meio do ID. Caso nenhum parâmetro seja informado (TckrSymb ou RptDt) será retornado um JSON paginado para com todos os registros do arquivo. Enviando pelo menos um dos parâmetros será retornado apenas um registro.
     </span>
 </span>
 
-<br>
-
+#### Exemplo em JavaScript
 ```js
 // Passo 1: Recuperar o token retornado pelo endpoint de login
 const token = localStorage.getItem('token');
@@ -281,11 +259,11 @@ const response = await fetch(url.href, {
 // Passo 5: Obter a resposta em JSON
 const data = await response.json();
 ```
-#### Resposta esperada em `data`
 
+#### Resposta esperada em `data`
 <table style="width: 100%">
 <tr>
-<th>Com envio de pârametros (TckrSymb e/ou RptDt)</th>
+<th style="text-align: center;">Com envio de pârametros (TckrSymb e/ou RptDt)</th>
 </tr>
 <tr>
 <td>
@@ -325,7 +303,7 @@ const data = await response.json();
 </table>
 <table style="width: 100%">
 <tr>
-<th>Sem envio de pârametros (TckrSymb e/ou RptDt)</th>
+<th style="text-align: center;">Sem envio de pârametros (TckrSymb e/ou RptDt)</th>
 </tr>
 <tr>
 <td>
