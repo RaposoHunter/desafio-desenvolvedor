@@ -22,6 +22,8 @@ class FileRecordResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        if(!$this->resource) return [];
+
         return array_merge([
             'RptDt' => null,
             'TckrSymb' => null,
@@ -29,6 +31,6 @@ class FileRecordResource extends JsonResource
             'SctyCtgyNm' => null,
             'ISIN' => null,
             'CrpnNm' => null
-        ], $this->resource->toArray());
+        ], parent::toArray($request));
     }
 }
