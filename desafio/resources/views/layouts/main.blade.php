@@ -47,6 +47,8 @@
                         </ul>
 
                         <div id="user-profile-container" @class(['dropdown', 'd-none' => !auth()->check()])>
+                            <span id="user-profile-name">{{ auth()->user()?->name }}</span>
+
                             <img src="{{ asset('images/placeholder-avatar.jpg') }}"
                                 alt="{{ auth()->user()?->name }}"
                                 class="img-fluid rounded-circle dropdown-toggle"
@@ -83,10 +85,21 @@
             @yield('content')
         </main>
 
-        <footer class="bg-light">
+        <footer class="d-flex flex-column gap-2 bg-light">
             <strong>
                 {{ date('Y') }} | Desenvolvido por Pedro Raposo Felix de Sousa &copy;
             </strong>
+
+            <div class="d-flex gap-2">
+                <a href="https://github.com/RaposoHunter" target="_blank" rel="noreferrer">
+                    <img class="icon" src="{{ asset('images/icons/github-brands-solid.svg') }}" alt="">
+                    GitHub
+                </a>
+                <a href="https://www.linkedin.com/in/pedro-raposo-8b72301a2/" target="_blank" rel="noreferrer">
+                    <img class="icon" src="{{ asset('images/icons/linkedin-brands-solid.svg') }}" alt="">
+                    LinkedIn
+                </a>
+            </div>
         </footer>
 
         <div class="modal fade" id="login-modal" tabindex="-1" role="dialog" aria-labelledby="login-modal-label" aria-hidden="true">
@@ -137,16 +150,23 @@
                         return;
                     }
 
+                    localStorage.setItem('token', response.data.token);
+
                     const container = document.getElementById('user-profile-container');
+
+                    api.get('/me').then(response => {
+                        if(!response || !response.ok) return;
+
+                        container.querySelector('img').setAttribute('alt', response.data.name);
+                        container.querySelector('#user-profile-name').textContent = response.data.name;
+                    });
+
                     container.classList.remove('d-none');
-                    container.querySelector('img').setAttribute('alt', response.data.name);
 
                     const button = document.getElementById('logout-btn');
                     button.classList.add('d-none');
 
                     document.querySelector('#login-modal button[data-bs-dismiss="modal"]').click();
-
-                    localStorage.setItem('token', response.data.token);
 
                     form.reset();
                 });
@@ -166,6 +186,7 @@
                     const container = document.getElementById('user-profile-container');
                     container.classList.add('d-none');
                     container.querySelector('img').setAttribute('alt', '');
+                    container.querySelector('#user-profile-name').textContent = '';
 
                     const button = document.getElementById('logout-btn');
                     button.classList.remove('d-none');
