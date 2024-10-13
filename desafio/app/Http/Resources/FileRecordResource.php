@@ -24,13 +24,12 @@ class FileRecordResource extends JsonResource
     {
         if(!$this->resource) return [];
 
-        return array_merge([
-            'RptDt' => null,
-            'TckrSymb' => null,
-            'MktNm' => null,
-            'SctyCtgyNm' => null,
-            'ISIN' => null,
-            'CrpnNm' => null
-        ], parent::toArray($request));
+        $data = [];
+
+        foreach($this->resource->getFillable() as $fillable) {
+            $data[$fillable] = $this->resource->$fillable;
+        }
+
+        return array_merge($data, parent::toArray($request));
     }
 }

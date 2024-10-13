@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use Laravel\Sanctum\Sanctum;
+use Illuminate\Support\Number;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use App\Models\Sanctum\PersonalAccessToken;
 
@@ -13,7 +15,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        Number::useLocale(app()->getLocale());
+
+        View::share('locale', str_replace('_', '-', app()->getLocale()));
     }
 
     /**

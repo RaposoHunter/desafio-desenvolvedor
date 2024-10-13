@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::view('/', 'welcome');
+Route::view('/', 'welcome')->name('welcome');
+Route::view('/arquivos', 'files')->name('files');
 
 include __DIR__.'/auth.php';

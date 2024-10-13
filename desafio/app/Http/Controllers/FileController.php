@@ -24,7 +24,9 @@ class FileController extends Controller
      */
     public function index()
     {
-        //
+        $files = File::query()->paginate(5);
+
+        return FileResource::collection($files);
     }
 
     /**

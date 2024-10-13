@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ $locale }}">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -15,6 +15,9 @@
         <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
         <script src="{{ asset('js/bootstrap/bootstrap.min.js') }}"></script>
         <script src="{{ asset('js/script.js') }}" type="module"></script>
+        <script>
+            localStorage.setItem('locale', @json($locale));
+        </script>
         @stack('js')
     </head>
     <body>
@@ -36,13 +39,22 @@
                     <div class="collapse navbar-collapse" id="navbar-links-container">
                         <ul class="navbar-nav me-auto mt-2 mt-lg-0">
                             <li class="nav-item">
-                                <a class="nav-link text-white fw-bold" href="#" aria-current="page">
+                                <a @class(['nav-link', 'text-white', 'fw-bold' => request()->is('/')]) href="{{ route('welcome') }}" aria-current="page">
                                     Home
-                                    <span class="visually-hidden">(current)</span>
+
+                                    @if(request()->is('/'))
+                                        <span class="visually-hidden">(current)</span>
+                                    @endif
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-white" href="#">Arquivos</a>
+                                <a @class(['nav-link', 'text-white', 'fw-bold' => request()->is('arquivos')]) href="{{ route('files') }}">
+                                    Arquivos
+
+                                    @if(request()->is('arquivos'))
+                                        <span class="visually-hidden">(current)</span>
+                                    @endif
+                                </a>
                             </li>
                         </ul>
 
@@ -65,12 +77,12 @@
                                         <img class="icon me-1" src="{{ asset('images/icons/power-off-solid.svg') }}" />
                                         Sair
                                     </button>
-                                    <form id="logout-form" action="{{ route('auth.logout') }}"></form>
+                                    <form id="logout-form" action="{{ route('auth.logout') }}" hidden aria-hidden="true"></form>
                                 </li>
                             </ul>
                         </div>
 
-                        <button id="logout-btn" @class(['btn btn-light', 'd-none' => auth()->check()])
+                        <button id="login-btn" @class(['btn btn-light', 'd-none' => auth()->check()])
                             data-bs-toggle="modal"
                             data-bs-target="#login-modal"
                         >
@@ -163,7 +175,7 @@
 
                     container.classList.remove('d-none');
 
-                    const button = document.getElementById('logout-btn');
+                    const button = document.getElementById('login-btn');
                     button.classList.add('d-none');
 
                     document.querySelector('#login-modal button[data-bs-dismiss="modal"]').click();
@@ -188,7 +200,7 @@
                     container.querySelector('img').setAttribute('alt', '');
                     container.querySelector('#user-profile-name').textContent = '';
 
-                    const button = document.getElementById('logout-btn');
+                    const button = document.getElementById('login-btn');
                     button.classList.remove('d-none');
 
                     localStorage.removeItem('token');

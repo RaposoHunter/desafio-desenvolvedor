@@ -54,6 +54,11 @@ class Api
                 options.headers['Authorization'] = `Bearer ${token}`;
             }
 
+            if(data instanceof FormData) {
+                options.body = data;
+                delete options.headers['Content-Type'];
+            }
+
             const response = await fetch(Api.prepareURL(url), options);
 
             if(response.status !== 204) {
@@ -79,7 +84,7 @@ class Api
     {
         url = url.toLowerCase()
             .replace(/\\/g, '/')
-            .replace(/[^a-z0-9\/\.-:]/g, '')
+            .replace(/[^a-z0-9\/\.-:\?\=]/g, '')
             .replace(/(^\/+)|(\/+$)+/g, '');
 
         return !url.startsWith('http://') && !url.startsWith('https://')
