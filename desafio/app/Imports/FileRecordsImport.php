@@ -46,6 +46,20 @@ class FileRecordsImport implements ToModel, WithHeadingRow, WithCustomCsvSetting
         return (new FileRecord($attributes));
     }
 
+    public function beforeImport()
+    {
+        $this->file->fill([
+            'status' => FileUploadStatus::Uploading,
+        ])->saveQuietly();
+    }
+
+    public function afterImport()
+    {
+        $this->file->fill([
+            'status' => FileUploadStatus::Uploaded,
+        ])->saveQuietly();
+    }
+
     public function headingRow(): int
     {
         // Os arquivos de exemplo possuem cabeçalhos na segunda linha. Sendo a primeira reservada ao status do arquivo.

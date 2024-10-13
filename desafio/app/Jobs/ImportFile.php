@@ -3,7 +3,6 @@
 namespace App\Jobs;
 
 use App\Models\File;
-use App\Enums\FileUploadStatus;
 use App\Imports\FileRecordsImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Foundation\Queue\Queueable;
@@ -23,17 +22,9 @@ class ImportFile implements ShouldQueue
      */
     public function handle(): void
     {
-        $this->file->fill([
-            'status' => FileUploadStatus::Uploading,
-        ])->saveQuietly();
-
         Excel::import(
             import: new FileRecordsImport($this->file),
             filePath: public_path("upload/{$this->file->path}")
         );
-
-        $this->file->fill([
-            'status' => FileUploadStatus::Uploaded,
-        ])->saveQuietly();
     }
 }
