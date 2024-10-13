@@ -4,16 +4,24 @@ namespace App\Imports;
 
 use App\Models\File;
 use App\Models\FileRecord;
+use App\Enums\FileUploadStatus;
 use Maatwebsite\Excel\Concerns\ToModel;
+use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithBatchInserts;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
-use Maatwebsite\Excel\Concerns\WithCustomChunkSize;
 use Maatwebsite\Excel\Imports\HeadingRowFormatter;
+use Maatwebsite\Excel\Concerns\WithCustomChunkSize;
 use Maatwebsite\Excel\Concerns\WithCustomCsvSettings;
+use Maatwebsite\Excel\Concerns\RegistersEventListeners;
 
-class FileRecordsImport implements ToModel, WithHeadingRow, WithCustomCsvSettings, WithChunkReading, WithBatchInserts, WithCustomChunkSize
+class FileRecordsImport implements ToModel, WithHeadingRow, WithCustomCsvSettings, WithChunkReading, WithBatchInserts, WithCustomChunkSize, WithEvents
 {
+    use RegistersEventListeners;
+
+    private int $processed_bytes = 0;
+    private int $records = 0;
+
     /**
      * Tamanho dos chunks de leitura/escrita da importação.
      *
@@ -24,7 +32,7 @@ class FileRecordsImport implements ToModel, WithHeadingRow, WithCustomCsvSetting
     public function __construct(public File $file)
     {
         // NOTE: Mesmo com a leitura/escrita do arquivo em chunks, é possível exceder o limite de memória.
-        ini_set('memory_limit', '-1');
+        ini_set('memory_limit', '512M');
 
         // Remove a formatação padrão das colunas do cabeçalho para atribuição rápida dos valores ao model.
         HeadingRowFormatter::default('none');
@@ -37,6 +45,12 @@ class FileRecordsImport implements ToModel, WithHeadingRow, WithCustomCsvSetting
     */
     public function model(array $row)
     {
+        // Incrementando o total de bytes processados para cálculo do progresso.
+        $this->processed_bytes += strlen(implode(';', $row));
+
+        // Incrementando o total de registros processados.
+        $this->records++;
+
         // Recupera apenas os valores não vazios do array para evitar "sujar" a tabela.
         $attributes = array_filter($row);
 
@@ -50,6 +64,16 @@ class FileRecordsImport implements ToModel, WithHeadingRow, WithCustomCsvSetting
     {
         $this->file->fill([
             'status' => FileUploadStatus::Uploading,
+            'records' => 0,
+            'progress' => 0.0,
+        ])->saveQuietly();
+    }
+
+    public function afterBatch()
+    {
+        $this->file->fill([
+            'records' => $this->records,
+            'progress' => round($this->processed_bytes / $this->file->size, 4) * 100,
         ])->saveQuietly();
     }
 
@@ -57,6 +81,7 @@ class FileRecordsImport implements ToModel, WithHeadingRow, WithCustomCsvSetting
     {
         $this->file->fill([
             'status' => FileUploadStatus::Uploaded,
+            'progress' => 100.0,
         ])->saveQuietly();
     }
 

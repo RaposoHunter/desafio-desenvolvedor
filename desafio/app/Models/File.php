@@ -33,7 +33,9 @@ class File extends Model
         'extension',
         'path',
         'size',
-        'status'
+        'status',
+        'records',
+        'progress',
     ];
 
     /**
